@@ -1,16 +1,45 @@
-## Hi there 👋
+# 吴宇舰 / Yujian Wu
 
-<!--
-**tftrdtx/tftrdtx** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+2027 届计算机科学与技术本科在读（成都），方向：**大模型应用开发（RAG / Agent）**。
 
-Here are some ideas to get you started:
+正在寻找 **AI 应用开发 / Python 开发 / 软件实施 / 技术支持** 方向的机会，地点优先成都。
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+📧 2738093568@qq.com
+
+---
+
+## 项目
+
+### [course-rag-qa-system](https://github.com/tftrdtx/course-rag-qa-system)
+基于 RAG（检索增强生成）的课程资料智能问答系统 · Python / LangChain / Chroma / DeepSeek API
+
+用 LangChain 搭建完整的 RAG 链路：PDF 解析 → 分块 → 向量化 → 相似度检索 → 交由大模型生成带来源引用的答案。在基础链路上做了三个检索优化的对比实验：
+
+- **语义分块**：按段落 / 句子边界切分 + 短块合并，替代固定长度切分。测试文档上块数 67 → 59（-12%），平均块长 416 → 489 字符，Top-5 召回率保持 100%
+- **Rerank 重排序**：向量粗排 Top-20 + BGE-Reranker 交叉编码器精排 Top-5 的两阶段检索。Top-1 命中率 70% → 100%，MRR 0.85 → 1.0
+- **混合检索**：BM25（jieba 分词）+ 向量检索的加权 RRF 融合（k=60，权重 2.0:1.0）。在 59 块的较小文档库上与纯向量检索持平，据此分析了混合检索的适用边界——需数千块以上的大规模库、且存在专有名词 / 数字等精确匹配需求时才有收益
+
+配套 3 个独立评测脚本，用 Top-K 召回率、Top-1 命中率、MRR 三个指标横向对比不同检索策略。
+
+### [llm-multi-tool-agent](https://github.com/tftrdtx/llm-multi-tool-agent)
+基于 ReAct 框架的多工具 AI Agent · Python / DeepSeek API / 自研决策循环
+
+未使用 LangChain 的 Agent 封装，自行实现 ReAct 决策循环：模型按 `Thought → Action → Action Input` 格式输出文本，程序用正则解析出工具名与参数后调用对应工具，再将结果以 `Observation` 形式追加回消息历史，循环直至输出 `Final Answer`；设置最大迭代次数并在超限时追加指令强制模型收敛，避免死循环。
+
+- 5 个自定义工具：数学计算、Python 代码执行、文本摘要、中英翻译、时间查询；统一 `TOOLS` 注册机制，扩展新工具只需实现函数并注册一行
+- 对比评测（11 个问题，4 类场景）：整体准确率 72.7% → 90.9%，其中实时信息类问题 0% → 100%
+- 分析结论：提升集中于模型本身能力缺失的场景（实时信息、精确计算、外部系统访问），Agent 并非对所有任务都有增益
+
+---
+
+## 技能
+
+- **语言**：Python（主要）、C/C++（课程基础）
+- **大模型应用**：LangChain、Chroma、Sentence-Transformers / BGE 系列模型、BM25、RRF 融合、ReAct、提示词工程
+- **工具**：Git、Linux 常用命令、Premiere Pro（视频剪辑）
+
+---
+
+> 这两个项目是我在 AI 编程工具辅助下完成的学习项目，代码量合计约 2500 行，均为命令行 Demo，未做前后端分离与线上部署。
+> 方案设计、效果验证与调试由本人完成。近期在复盘中排查并修复了检索融合模块的一个问题：混合检索的文档唯一标识误用了对象内存地址（`id(doc)`），而向量检索与 BM25 返回的是不同对象，导致两路排名无法累加、融合失效——已改为按文档内容哈希标识，并补充隔离测试验证。
+> 欢迎查看代码与评测脚本。
